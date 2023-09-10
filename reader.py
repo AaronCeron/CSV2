@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 import sys
 import csv
+import json
 
 cwd = os.getcwd()
 
@@ -43,6 +44,16 @@ class CsvReader(Reader):
                 self.contents.append(line)
                 self.overwrite()
 
+class JsonReader(Reader):
+    def read(self):
+        self.contents = []
+        with open(sys.argv[1]) as f:
+            print("Open file...")
+            reader = json.load(f)
+            for line in reader:
+                self.contents.append(line)
+                self.overwrite()
+             
 class CsvWriter:
     def write(self):
         with open(sys.argv[2], 'w', newline='') as f:
@@ -50,14 +61,21 @@ class CsvWriter:
             for item in self.contents:
                 writer.writerow(item)
 
+class JsonWriter:
+    def write(self):
+        with open(sys.argv[2], 'w', newline='') as f:
+            writer = csv.writer(f)
+            for item in self.contents:
+                writer.writerow(item)
+
 def factory():
-    source_dictionary = {".csv": CsvReader}
+    source_dictionary = {".csv": CsvReader, ".json": JsonReader}
     source_path = os.path.join(cwd, sys.argv[1])
     source_type = Path(source_path).suffix
     if source_type not in source_dictionary:
         return None
     destination_path = os.path.join(cwd, sys.argv[2])
-    destination_dictionary = {".csv": CsvWriter}
+    destination_dictionary = {".csv": CsvWriter, ".json": JsonWriter}
     destination_type = Path(destination_path).suffix
     if destination_type not in destination_dictionary:
         return None
